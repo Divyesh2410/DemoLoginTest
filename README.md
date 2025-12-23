@@ -6,7 +6,7 @@ A Selenium-based test automation framework for login functionality testing using
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/Divyesh2410/DemoLoginTest.git
 cd LoginTestDemo
 
 # Build and run tests
@@ -109,4 +109,3 @@ Framework uses SLF4J for detailed logging. Logs appear in console during test ex
 ## 👤 Author
 
 **Divyesh**
-

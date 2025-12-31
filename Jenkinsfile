@@ -6,6 +6,14 @@ pipeline {
         jdk 'JDK11'
     }
     
+    parameters {
+        choice(
+            name: 'HEADLESS',
+            choices: ['true', 'false'],
+            description: 'Run tests in headless mode (true = no visible browser, false = visible browser)'
+        )
+    }
+    
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
         timeout(time: 30, unit: 'MINUTES')
@@ -28,8 +36,15 @@ pipeline {
         }
         
         stage('Test') {
+            environment {
+                HEADLESS = "${params.HEADLESS}"
+            }
             steps {
-                echo 'Running tests...'
+                script {
+                    def headlessMode = params.HEADLESS ?: 'false'
+                    echo "Running tests with HEADLESS=${headlessMode}"
+                    echo "Browser visibility: ${headlessMode == 'true' ? 'HIDDEN (headless)' : 'VISIBLE'}"
+                }
                 bat 'mvn test'
             }
             post {

@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.slf4j.Logger;
@@ -24,13 +25,33 @@ public class BaseClass {
 		prop = ConfigReader.loadconfig();
 		logger.info("Configuration loaded");
 		
+		// Get headless mode from configuration (can be overridden by Jenkins parameter)
+		String headlessMode = prop.getProperty("headless", "false");
+		boolean isHeadless = Boolean.parseBoolean(headlessMode);
+		
 		logger.info("Setting up ChromeDriver");
 		WebDriverManager.chromedriver().setup();
-		driver = new ChromeDriver();
+		
+		// Configure ChromeOptions based on headless setting
+		ChromeOptions options = new ChromeOptions();
+		if (isHeadless) {
+			logger.info("Running in HEADLESS mode (browser will not be visible)");
+			options.addArguments("--headless");
+			options.addArguments("--disable-gpu");
+			options.addArguments("--no-sandbox");
+			options.addArguments("--disable-dev-shm-usage");
+			options.addArguments("--window-size=1920,1080");
+		} else {
+			logger.info("Running in VISIBLE mode (browser will be visible)");
+		}
+		
+		driver = new ChromeDriver(options);
 		logger.info("ChromeDriver initialized");
 
-		logger.info("Maximizing browser window");
-		driver.manage().window().maximize();
+		if (!isHeadless) {
+			logger.info("Maximizing browser window");
+			driver.manage().window().maximize();
+		}
 		
 		String url = prop.getProperty("url");
 		logger.info("Navigating to URL: {}", url);

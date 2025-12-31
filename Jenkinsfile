@@ -9,8 +9,8 @@ pipeline {
     parameters {
         choice(
             name: 'HEADLESS',
-            choices: ['true', 'false'],
-            description: 'Run tests in headless mode (true = no visible browser, false = visible browser)'
+            choices: ['false', 'true'],
+            description: 'Run tests in headless mode (true = no visible browser, false = visible browser). Default: false (visible)'
         )
     }
     
@@ -37,13 +37,16 @@ pipeline {
         
         stage('Test') {
             environment {
-                HEADLESS = "${params.HEADLESS}"
+                HEADLESS = "${params.HEADLESS ?: 'false'}"
             }
             steps {
                 script {
                     def headlessMode = params.HEADLESS ?: 'false'
-                    echo "Running tests with HEADLESS=${headlessMode}"
+                    echo "=========================================="
+                    echo "HEADLESS Parameter Value: ${headlessMode}"
                     echo "Browser visibility: ${headlessMode == 'true' ? 'HIDDEN (headless)' : 'VISIBLE'}"
+                    echo "Environment variable HEADLESS will be: ${env.HEADLESS}"
+                    echo "=========================================="
                 }
                 bat 'mvn test'
             }

@@ -23,11 +23,13 @@ public class BaseClass {
 	public void setup() {
 		logger.info("===== Starting test execution =====");
 		prop = ConfigReader.loadconfig();
-		logger.info("Configuration loaded");
 		
 		// Get headless mode from configuration (can be overridden by Jenkins parameter)
 		String headlessMode = prop.getProperty("headless", "false");
-		boolean isHeadless = Boolean.parseBoolean(headlessMode);
+		
+		// Parse boolean - explicitly check for "true" (case-insensitive), default to false
+		String headlessTrimmed = headlessMode != null ? headlessMode.trim().toLowerCase() : "false";
+		boolean isHeadless = "true".equals(headlessTrimmed);
 		
 		logger.info("Setting up ChromeDriver");
 		WebDriverManager.chromedriver().setup();
@@ -35,37 +37,28 @@ public class BaseClass {
 		// Configure ChromeOptions based on headless setting
 		ChromeOptions options = new ChromeOptions();
 		if (isHeadless) {
-			logger.info("Running in HEADLESS mode (browser will not be visible)");
+			logger.info("Running in HEADLESS mode");
 			options.addArguments("--headless");
 			options.addArguments("--disable-gpu");
 			options.addArguments("--no-sandbox");
 			options.addArguments("--disable-dev-shm-usage");
 			options.addArguments("--window-size=1920,1080");
-		} else {
-			logger.info("Running in VISIBLE mode (browser will be visible)");
 		}
 		
 		driver = new ChromeDriver(options);
-		logger.info("ChromeDriver initialized");
 
 		if (!isHeadless) {
-			logger.info("Maximizing browser window");
 			driver.manage().window().maximize();
 		}
 		
 		String url = prop.getProperty("url");
-		logger.info("Navigating to URL: {}", url);
 		driver.get(url);
-		logger.info("Page loaded successfully");
 	}
 
 	@AfterMethod
 	public void quit() {
 		if (driver != null) {
-			logger.info("Closing browser");
 			driver.quit();
-			logger.info("Browser closed successfully");
 		}
-		logger.info("===== Test execution completed =====");
 	}
 }
